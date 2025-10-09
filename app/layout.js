@@ -1,5 +1,9 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import React from "react";
+import { connectDB } from "@/util/database";
+import Providers from "./providers";
+import PlaylistPage from "./playlistpage";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,11 +23,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>
+          {/* <PlaylistPage /> */}
+          {children}
+        </Providers>
       </body>
     </html>
   );
