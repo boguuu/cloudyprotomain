@@ -1,79 +1,3 @@
-// "use client";
-
-// import React, { useState, useEffect } from "react";
-// import MainPlayer from "./MainPlayer";
-// import Playlist from "./Playlist";
-// import Sidebar from "./Sidebar";
-// import { getSongDetailsFromGenius } from "../../util/geniusClient.js";
-
-// // 이 컴포넌트가 기존 page.js의 모든 클라이언트 사이드 역할을 담당합니다.
-// export default function MusicPlayerClient(props) {
-//   console.log(props.initialPlaylist);
-
-//   // initialPlaylist를 안전하게 변환하여 초기 상태로 사용
-//   const [playlist, setPlaylist] = useState(() => {
-//     // 컴포넌트가 처음 마운트될 때 한 번만 실행되도록 함수형으로 초기화
-//     if (!props.initialPlaylist) return []; // initialPlaylist가 없으면 빈 배열 반환
-
-//     return props.initialPlaylist.map((item) => ({
-//       _id: item._id ? item._id.toString() : null,
-//       videoId: item.videoId ? String(item.videoId).split("?")[0] : null, // ?si= 같은 파라미터 제거
-//       title: item.title ?? "제목 없음",
-//       artist: item.artist ?? "아티스트 정보 없음",
-//     }));
-//   });
-
-//   // 현재 재생할 곡의 인덱스를 상태로 관리
-//   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-
-//   const [geniusData, setGeniusData] = useState(null);
-//   const currentTrack = playlist[currentTrackIndex];
-
-//   // API 호출 로직 (필요하다면)
-//   // useEffect(() => {
-//   //   // 예시: async function fetchPlaylist() { ... }
-//   //   // 여기서는 초기 데이터를 그냥 사용합니다.
-//   // }, []);
-//   useEffect(() => {
-//     if (currentTrack && currentTrack.title && currentTrack.artist) {
-//       // 새 노래가 시작되면 이전 데이터를 초기화
-//       setGeniusData(null);
-
-//       getSongDetailsFromGenius(currentTrack.title, currentTrack.artist).then(
-//         (data) => {
-//           if (data) {
-//             setGeniusData(data);
-//             console.log("Genius 데이터:", data);
-//           }
-//         }
-//       );
-//     }
-//   }, [currentTrack]); // currentTrack이 바뀔 때마다 이 효과가 실행됩니다.
-
-//   // 현재 재생할 곡 정보
-
-//   const handleTrackSelect = (index) => {
-//     setCurrentTrackIndex(index);
-//   };
-
-//   return (
-//     // MainPlayer와 Playlist를 함께 렌더링
-//     <>
-//       <Sidebar />
-//       <div className="flex flex-col flex-grow gap-4">
-//         {currentTrack && <MainPlayer track={playlist} />}
-//       </div>
-//       <Playlist
-//         track={playlist}
-//         currentTrackIndex={currentTrackIndex}
-//         onTrackSelect={handleTrackSelect}
-//       />
-//     </>
-//   );
-// }
-
-// MusicPlayerClient.jsx
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -203,6 +127,8 @@ export default function MusicPlayerClient(props) {
         track={playlist}
         currentTrackIndex={currentTrackIndex}
         onTrackSelect={setCurrentTrackIndex}
+        albumArt={geniusData?.albumArt}
+        geniusData={geniusData}
       />
     </>
   );

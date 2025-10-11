@@ -23,7 +23,7 @@ export default function MainPlayer(props) {
   const onNextTrack = props.onNextTrack || (() => {}); // 다음 곡 재생을 부모에게 요청하는 콜백
   const onPrevTrack = props.onPrevTrack || (() => {}); // 이전 곡 재생을 부모에게 요청하는 콜백
   const albumArt = props.albumArt || null; // 기존 폴백
-  const geniusData = props.geniusData || null; // ✅ 부모에서 내려준 Genius 데이터
+  const geniusData = props.geniusData || null; // Genius 데이터 전체
 
   // --- 내부 UI 상태 관리 (useState) ---
   // 이 컴포넌트 안에서만 사용되는 UI 관련 상태들입니다.
@@ -129,25 +129,18 @@ export default function MainPlayer(props) {
     const p = playerRef.current;
     if (!p) return;
 
-    // 영상이 재생되기 시작했을 때
     if (event.data === window.YT.PlayerState.PLAYING) {
       setIsPlaying(true);
-      const vd = p.getVideoData(); // YouTube 영상의 실제 메타데이터
+      const vd = p.getVideoData?.() || {};
       setTotalTime(p.getDuration ? p.getDuration() : 0);
       setVideoTitle(vd.title || "");
       setArtist(vd.author || "");
-
-      // ✨ 가장 중요한 부분: 부모 컴포넌트에게 실제 영상 데이터를 전달하여 Genius API 등을 호출하게 함
-      onTrackData(vd);
-    }
-    // 영상 재생이 끝났을 때
-    else if (event.data === window.YT.PlayerState.ENDED) {
+      // 부모로 실제 YT 메타 전달 → 부모가 Genius 호출
+      onTrackData?.(vd);
+    } else if (event.data === window.YT.PlayerState.ENDED) {
       setIsPlaying(false);
-      // 다음 곡으로 넘어가는 로직은 부모에게 위임
-      onNextTrack();
-    }
-    // 그 외 상태 (일시정지, 버퍼링 등)
-    else {
+      onNextTrack?.(); // 다음 곡 재생 요청
+    } else if (event.data === window.YT.PlayerState.PAUSED) {
       setIsPlaying(false);
     }
   };
@@ -228,14 +221,7 @@ export default function MainPlayer(props) {
     ? `https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg`
     : undefined;
   const displayAlbumArt = geniusData?.albumArt || albumArt || ytThumb;
-
-  // 표시용 파생 값들: Genius 우선, 없으면 YouTube 메타/기존 값
-  const displayTitle =
-    geniusData?.songTitle ||
-    // geniusData?.fullTitle || // 필요 시
-    videoTitle ||
-    "Loading...";
-
+  const displayTitle = geniusData?.songTitle || videoTitle || "Loading...";
   const displayArtist = geniusData?.artistName || artist || "";
 
   return (
@@ -259,7 +245,6 @@ export default function MainPlayer(props) {
       <h2 className="text-3xl font-bold">{displayTitle}</h2>
       <p className="text-white/60 mb-6">{displayArtist || "..."}</p>
 
-      {/* 재생 바 UI */}
       <div className="w-full max-w-md mb-4 mt-2">
         <div className="h-1.5 bg-white/20 rounded-full relative group">
           <div

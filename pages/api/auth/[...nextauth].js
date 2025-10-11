@@ -6,12 +6,42 @@ import { connectDB } from "@/util/database";
 export const authOptions = {
   providers: [
     GoogleProvider({
-      clientId:
-        "664719290061-1qjm6s4kc3koiltokb7rv3e3o660kg2n.apps.googleusercontent.com",
-      clientSecret: "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",
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope:
+            "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube",
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   ],
-  secret: "qwertyuiopasdfghjklzxcvbnm123456",
+  session: { strategy: "jwt" },
+
+  callbacks: {
+    async jwt({ token, account, user }) {
+      if (account) {
+        token.accessToken = account.access_token || token.accessToken;
+        token.refreshToken = account.refresh_token || token.refreshToken;
+        token.expiresAt = account.expires_at
+          ? account.expires_at * 1000
+          : token.expiresAt;
+        token.provider = account.provider || token.provider;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token?.accessToken ?? null;
+      session.refreshToken = token?.refreshToken ?? null;
+      session.expiresAt = token?.expiresAt ?? null;
+      session.provider = token?.provider ?? null;
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   adapter: MongoDBAdapter(connectDB),
 };
 
