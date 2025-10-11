@@ -18,12 +18,10 @@ const normalizeSpaces = (s) =>
 
 const sanitizeTitle = (raw) => {
   let t = stripBrackets(raw);
-  // 불필요한 키워드 제거
   t = t.replace(
     /\b(official|music\s*video|mv|lyric(s)?|audio|teaser|trailer|live|performance|ver\.?|version)\b/gi,
     ""
   );
-  // feat. 이후 제거(선택)
   t = t.replace(/\b(feat|ft)\.?.*$/i, "");
   t = normalizeSpaces(t);
   return t || String(raw || "").trim();
@@ -31,8 +29,8 @@ const sanitizeTitle = (raw) => {
 
 const sanitizeArtist = (raw) => {
   let a = stripBrackets(raw);
-  a = a.replace(/\s*-\s*topic\b/gi, ""); // "- Topic" 제거
-  a = a.replace(/\b(vevo|official)\b/gi, ""); // VEVO/Official 제거
+  a = a.replace(/\s*-\s*topic\b/gi, "");
+  a = a.replace(/\b(vevo|official)\b/gi, "");
   a = normalizeSpaces(a);
   return a;
 };
@@ -48,13 +46,20 @@ const buildGeniusQuery = (videoData, fallbackTrack) => {
   };
 };
 
-// 응답이 혹시 다른 스키마여도 평탄화 보정(보호막)
 const normalizeGenius = (res) => {
   if (!res) return null;
-  // 이미 평탄화된 형태
-  if (res.songTitle || res.artistName || res.albumArt) return res;
-  // 혹시 { ok, data } 형태가 들어오면 data만
-  if (res.data) return res.data;
+  if (res.songTitle || res.artistName) return res;
+
+  if (res.title || res.artist) {
+    return {
+      songTitle: res.title,
+      artistName: res.artist,
+      albumArt: res.albumArt,
+      lyrics: res.lyrics,
+    };
+  }
+
+  if (res.data) return normalizeGenius(res.data);
   return null;
 };
 
@@ -69,37 +74,59 @@ export default function MusicPlayerClient(props) {
     }));
   });
 
-  const [geniusData, setGeniusData] = useState(null);
+  const [geniusDataById, setGeniusDataById] = useState({});
+  const [youtubeMetaById, setYoutubeMetaById] = useState({});
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
-  // 레이스 방지용 요청 id
+  // --- 1. 최신 인덱스 추적을 위한 useRef 추가 ---
+  const trackIndexRef = useRef(currentTrackIndex);
+  useEffect(() => {
+    trackIndexRef.current = currentTrackIndex;
+  }, [currentTrackIndex]);
+
   const lastReqIdRef = useRef(0);
 
+  // --- 2. handleYoutubeData 로직 수정 ---
   const handleYoutubeData = useCallback(
     (videoData) => {
-      setGeniusData(null);
-      const reqId = ++lastReqIdRef.current;
+      // useCallback의 클로저 문제를 해결하기 위해 ref에서 최신 인덱스를 가져옵니다.
+      const latestTrackIndex = trackIndexRef.current;
+      const currentTrack = playlist[latestTrackIndex];
 
-      const fallbackTrack = playlist[currentTrackIndex];
-      const { title, artist } = buildGeniusQuery(videoData, fallbackTrack);
-      const expectedVideoId = fallbackTrack?.videoId;
+      if (!currentTrack || !currentTrack.videoId) return;
+
+      const videoId = currentTrack.videoId;
+
+      setYoutubeMetaById((prev) => ({
+        ...prev,
+        [videoId]: { title: videoData.title, artist: videoData.author },
+      }));
+
+      if (geniusDataById[videoId]) return;
+
+      const reqId = ++lastReqIdRef.current;
+      const { title, artist } = buildGeniusQuery(videoData, currentTrack);
 
       getSongDetailsFromGenius(title, artist).then((raw) => {
-        // 요청 id가 최신이 아니면 무시(이전 트랙의 늦게 온 응답 방지)
         if (reqId !== lastReqIdRef.current) return;
 
         const normalized = normalizeGenius(raw);
-        // 트랙이 바뀌었거나 데이터가 없으면 무시
         if (!normalized) return;
-        // 현재 선택된 트랙의 videoId가 여전히 동일할 때만 반영
-        if (expectedVideoId !== playlist[currentTrackIndex]?.videoId) return;
 
-        setGeniusData(normalized);
-        console.log("Genius 데이터(정규화):", normalized);
+        // API 응답이 왔을 때도 ref의 최신 인덱스와 비교하여 정확성을 높입니다.
+        if (videoId === playlist[trackIndexRef.current]?.videoId) {
+          setGeniusDataById((prev) => ({ ...prev, [videoId]: normalized }));
+          console.log(`Genius 데이터 [${videoId}] 저장:`, normalized);
+        }
       });
     },
-    [playlist, currentTrackIndex]
+    [playlist, geniusDataById] // 종속성 배열에서 currentTrackIndex 제거
   );
+
+  const currentTrackVideoId = playlist[currentTrackIndex]?.videoId;
+  const currentGeniusData = currentTrackVideoId
+    ? geniusDataById[currentTrackVideoId]
+    : null;
 
   return (
     <>
@@ -118,8 +145,7 @@ export default function MusicPlayerClient(props) {
                 (i) => (i - 1 + playlist.length) % playlist.length
               )
             }
-            albumArt={geniusData?.albumArt}
-            geniusData={geniusData} // ✅ Genius 데이터 전체 전달
+            geniusData={currentGeniusData}
           />
         )}
       </div>
@@ -127,8 +153,8 @@ export default function MusicPlayerClient(props) {
         track={playlist}
         currentTrackIndex={currentTrackIndex}
         onTrackSelect={setCurrentTrackIndex}
-        albumArt={geniusData?.albumArt}
-        geniusData={geniusData}
+        geniusById={geniusDataById}
+        metaById={youtubeMetaById}
       />
     </>
   );

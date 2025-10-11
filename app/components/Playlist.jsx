@@ -120,7 +120,10 @@ export default function Playlist({
               metaItem?.title ||
               "제목 없음";
             const artist =
-              gdItem?.artistName || song?.artist || metaItem?.artist || "";
+              gdItem?.artistName ||
+              song?.artist ||
+              metaItem?.artist ||
+              "아티스트 없음";
             const thumb =
               gdItem?.albumArt ||
               (song?.videoId
