@@ -124,11 +124,12 @@ export default function Playlist({
               song?.artist ||
               metaItem?.artist ||
               "아티스트 없음";
-            const thumb =
-              gdItem?.albumArt ||
-              (song?.videoId
-                ? `https://i.ytimg.com/vi/${song.videoId}/default.jpg`
-                : null);
+            // const thumb =
+            //   gdItem?.albumArt ||
+            //   (song?.videoId
+            //     ? `https://i.ytimg.com/vi/${song.videoId}/default.jpg`
+            //     : null);
+            const thumb = gdItem?.albumArt || (song?.videoId ? null : null); // 썸네일 대신 앨범 아트만 사용
             return (
               <div
                 key={key}

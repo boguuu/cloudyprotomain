@@ -20,7 +20,7 @@ export default async function Home() {
   }));
 
   // 서버 로그(터미널)
-  console.log("server safePlaylist[0].videoId:", safePlaylist[0]?.videoId);
+  // console.log("server safePlaylist[0].videoId:", safePlaylist[0]?.videoId);
 
   return (
     <div className="w-full max-w-6xl h-[600px] flex gap-4 text-white">

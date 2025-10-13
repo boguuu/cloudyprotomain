@@ -3,7 +3,6 @@ import "./globals.css";
 import React from "react";
 import { connectDB } from "@/util/database";
 import Providers from "./providers";
-import PlaylistPage from "./playlistpage";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,10 +26,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {/* <PlaylistPage /> */}
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

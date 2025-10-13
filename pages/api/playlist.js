@@ -10,12 +10,7 @@ export default async function handler(req, res) {
       client = await MongoClient.connect(MONGODB_URI);
       const db = client.db(MONGODB_DB);
 
-      // 'songs' 컬렉션에서 10개의 문서를 가져옵니다.
-      const playlist = await db
-        .collection("playlist")
-        .find()
-        .limit(10)
-        .toArray();
+      const playlist = await db.collection("playlist").find().limit().toArray();
 
       res.status(200).json({ playlist });
     } catch (error) {

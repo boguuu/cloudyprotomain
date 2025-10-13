@@ -70,7 +70,13 @@ export default function MainPlayer(props) {
       height: "0",
       width: "0",
       videoId: currentVideoId,
-      playerVars: { rel: 0, controls: 0, autoplay: 0, playsinline: 1 }, // 자동재생은 로드 후 별도 제어
+      playerVars: {
+        rel: 0,
+        controls: 0,
+        autoplay: 0,
+        playsinline: 1,
+        origin: window.location.origin,
+      }, // 자동재생은 로드 후 별도 제어
       events: {
         onReady: (e) => {
           // playerRef에 생성된 플레이어 인스턴스를 저장. (useState가 아닌 useRef 사용으로 리렌더링 방지)
