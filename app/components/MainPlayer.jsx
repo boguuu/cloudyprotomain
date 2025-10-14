@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Play,
-  Shuffle,
   Repeat,
   Share2,
   Pause,
@@ -15,27 +14,21 @@ const glassmorphismStyle =
 
 export default function MainPlayer(props) {
   // --- Props 처리 ---
-  // 부모로부터 받은 props를 안전하게 처리합니다. 값이 없으면 기본값을 사용합니다.
   const track = props.track || [];
   const externalIndex =
     typeof props.currentTrackIndex === "number" ? props.currentTrackIndex : 0;
-  const onTrackData = props.onTrackData || (() => {}); // YouTube 영상의 실제 메타데이터를 부모에게 전달하는 콜백
-  const onNextTrack = props.onNextTrack || (() => {}); // 다음 곡 재생을 부모에게 요청하는 콜백
-  const onPrevTrack = props.onPrevTrack || (() => {}); // 이전 곡 재생을 부모에게 요청하는 콜백
-  const albumArt = props.albumArt || null; // 기존 폴백
-  const geniusData = props.geniusData || null; // Genius 데이터 전체
+  const onNextTrack = props.onNextTrack || (() => {});
+  const onPrevTrack = props.onPrevTrack || (() => {});
+  const albumArt = props.albumArt || null;
+  const geniusData = props.geniusData || null;
 
   // --- 내부 UI 상태 관리 (useState) ---
-  // 이 컴포넌트 안에서만 사용되는 UI 관련 상태들입니다.
-  const [videoTitle, setVideoTitle] = useState("");
-  const [artist, setArtist] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDragging, setIsDragging] = useState(false); // 재생 바를 사용자가 드래그하는지 여부
 
   // --- Refs ---
-  // 렌더링과 상관없이 값을 유지해야 할 때 사용합니다. (불필요한 리렌더링 방지)
   const playerRef = useRef(null); // 실제 YouTube 플레이어 인스턴스를 저장
   const animationFrameRef = useRef(null); // requestAnimationFrame의 ID를 저장
   const lastReportedTimeRef = useRef(0); // 재생 시간 업데이트 최적화를 위한 마지막 시간 저장
@@ -137,12 +130,7 @@ export default function MainPlayer(props) {
 
     if (event.data === window.YT.PlayerState.PLAYING) {
       setIsPlaying(true);
-      const vd = p.getVideoData?.() || {};
       setTotalTime(p.getDuration ? p.getDuration() : 0);
-      setVideoTitle(vd.title || "");
-      setArtist(vd.author || "");
-      // 부모로 실제 YT 메타 전달 → 부모가 Genius 호출
-      onTrackData?.(vd);
     } else if (event.data === window.YT.PlayerState.ENDED) {
       setIsPlaying(false);
       onNextTrack?.(); // 다음 곡 재생 요청
@@ -220,15 +208,16 @@ export default function MainPlayer(props) {
     return `${m}:${s}`;
   };
 
-  // --- 렌더링을 위한 값 계산 ---
+  // --- 표시값: Genius > DB(oEmbed) > 폴백 ---
   const progressPercent = totalTime > 0 ? (currentTime / totalTime) * 100 : 0;
-  // 앨범 아트가 있으면 그것을, 없으면 YouTube 썸네일을 사용
   const ytThumb = currentVideoId
     ? `https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg`
     : undefined;
+  const dbTitle = track[externalIndex]?.title || "";
+  const dbArtist = track[externalIndex]?.artist || "";
   const displayAlbumArt = geniusData?.albumArt || albumArt || ytThumb;
-  const displayTitle = geniusData?.songTitle || videoTitle || "Loading...";
-  const displayArtist = geniusData?.artistName || artist || "";
+  const displayTitle = geniusData?.songTitle || dbTitle || "Loading...";
+  const displayArtist = geniusData?.artistName || dbArtist || "";
 
   return (
     <main
@@ -281,6 +270,7 @@ export default function MainPlayer(props) {
       </div>
 
       <div className="flex items-center space-x-8">
+        {/* 동작이 없다면 Share/Repeat 버튼은 제거해도 됩니다 */}
         <button className="absolute right-8 text-white/70 hover:text-white transition-colors">
           <Share2 size={20} />
         </button>

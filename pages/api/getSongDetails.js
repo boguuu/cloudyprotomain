@@ -1,6 +1,4 @@
-// pages/api/getSongDetails.js
-
-import * as cheerio from "cheerio"; // cheerio 모듈 import
+import * as cheerio from "cheerio";
 
 const stripBrackets = (s = "") =>
   String(s)
