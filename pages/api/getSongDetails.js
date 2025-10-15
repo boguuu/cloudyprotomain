@@ -64,27 +64,36 @@ async function fetchGenius(title, artist, token) {
   }
 
   let lyrics = null;
-  // Genius 곡 페이지 URL이 있다면 가사를 스크래핑
   if (hit.url) {
     try {
-      const lyricsPageResponse = await fetch(hit.url, { cache: "no-store" });
+      const lyricsPageResponse = await fetch(hit.url, {
+        cache: "no-store",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
+          "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+      });
       if (lyricsPageResponse.ok) {
         const html = await lyricsPageResponse.text();
         const $ = cheerio.load(html);
+        lyrics = ""; // ← 재선언 금지, 바깥 변수에 누적
 
-        // Genius 웹사이트의 가사 영역을 찾아 스크래핑
-        const lyricsContainer = $('div[data-lyrics-container="true"]');
-        if (lyricsContainer.length > 0) {
-          lyrics = lyricsContainer
-            .html()
-            .replace(/<br\s*\/?>/gi, "\n") // <br> 태그를 줄바꿈으로 변경
-            .replace(/<[^>]*>/g, "") // 모든 HTML 태그 제거
-            .trim();
+        const lyricsContainers = $('div[data-lyrics-container="true"]');
+        if (lyricsContainers.length > 0) {
+          lyricsContainers.each((i, elem) => {
+            const verseHtml = $(elem).html() || "";
+            const verseText = verseHtml
+              .replace(/<br\s*\/?>/gi, "\n")
+              .replace(/<[^>]*>/g, "")
+              .trim();
+            if (verseText) lyrics += verseText + "\n\n";
+          });
+          lyrics = lyrics.trim();
         } else {
-          // 다른 가능한 셀렉터 시도 (예: 레거시 버전)
-          const legacyLyricsContainer = $(".lyrics");
-          if (legacyLyricsContainer.length > 0) {
-            lyrics = legacyLyricsContainer
+          const legacy = $(".lyrics");
+          if (legacy.length > 0) {
+            lyrics = legacy
               .html()
               .replace(/<br\s*\/?>/gi, "\n")
               .replace(/<[^>]*>/g, "")
@@ -115,8 +124,8 @@ async function fetchGenius(title, artist, token) {
       hit.header_image_url ||
       null,
     id: hit.id || null,
-    url: hit.url || null, // Genius 곡 페이지 URL
-    lyrics: lyrics, // 스크래핑한 가사 데이터
+    url: hit.url || null,
+    lyrics, // 바깥 변수 반환
   };
 }
 
