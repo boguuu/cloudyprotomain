@@ -76,6 +76,7 @@ export default function MainPlayer(props) {
           playerRef.current = e.target;
         },
         onStateChange: (e) => onPlayerStateChange(e), // 상태 변경 시 호출될 함수 연결
+        onError: onPlayerError, // 에러 로그 추가
       },
     });
     playerRef.current = p;
@@ -137,6 +138,22 @@ export default function MainPlayer(props) {
     } else if (event.data === window.YT.PlayerState.PAUSED) {
       setIsPlaying(false);
     }
+  };
+
+  // YT 에러 로깅
+  const onPlayerError = (event) => {
+    const code = event?.data;
+    const reason =
+      {
+        2: "Invalid parameter",
+        5: "HTML5 player error",
+        100: "Video not found / private",
+        101: "Embedding disabled by owner",
+        150: "Embedding disabled by owner",
+      }[code] || "Unknown";
+    console.error(
+      `[YT Error] code=${code} (${reason}) videoId=${currentVideoId}`
+    );
   };
 
   // --- 재생 바(Progress Bar) 업데이트 로직 ---
@@ -223,7 +240,18 @@ export default function MainPlayer(props) {
     <main
       className={`${glassmorphismStyle} p-8 flex-1 flex flex-col items-center justify-center text-white/90`}
     >
-      <div id="player" style={{ display: "none" }}></div>
+      {/* player 요소를 display:none 대신 오프스크린*/}
+      <div
+        id="player"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          left: -9999,
+          top: 0,
+          overflow: "hidden",
+        }}
+      ></div>
 
       <div className="w-52 h-52 rounded-lg shadow-2xl overflow-hidden mb-6">
         {displayAlbumArt ? (
