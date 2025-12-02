@@ -3,28 +3,18 @@ import React from "react";
 import { connectDB } from "@/util/database";
 import LoginBtn from "./LoginBtn";
 import MusicPlayerClient from "./components/MusicPlayerClient";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export default async function Home() {
-  const client =
-    typeof connectDB === "function" ? await connectDB() : await connectDB;
-  const db = client.db("cloudytest");
-  const initialPlaylist = await db.collection("playlist").find().toArray();
+  // 인증 쿠키 체크는 개발 단계에서 비활성화
+  // const cookieStore = cookies();
+  // const authToken = cookieStore.get("authToken");
+  // if (!authToken) {
+  //   redirect("/login");
+  // }
+  // redirect("/chating");
 
-  // plain object 배열로 강제 변환
-  const safePlaylist = initialPlaylist.map((item) => ({
-    _id: item._id ? item._id.toString() : null,
-    videoId: item.videoId ? String(item.videoId) : null,
-    title: item.title ?? null,
-    artist: item.artist ?? null,
-    // 필요한 다른 필드도 추가 변환
-  }));
-
-  // 서버 로그(터미널)
-  // console.log("server safePlaylist[0].videoId:", safePlaylist[0]?.videoId);
-
-  return (
-    <div className="w-full max-w-6xl h-[600px] flex gap-4 text-white">
-      <MusicPlayerClient initialPlaylist={safePlaylist} />
-    </div>
-  );
+  // 개발 단계: 항상 /login으로 이동
+  redirect("/login");
 }

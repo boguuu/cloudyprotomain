@@ -1,11 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body {
-  background: linear-gradient(to bottom, #797979, #0a0a0a);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+
+/* 기본 설정 레이어 */
+@layer base {
+  body {
+    /* 1. 배경색: 오로라 효과를 위해 아주 어두운 검정(#0a0a0a)을 기본으로 깝니다.
+      2. 텍스트: 전체적으로 밝은 회색(#E0E0E0)을 사용합니다.
+      3. 레이아웃: 기존에 쓰시던 중앙 정렬(flex) 속성을 유지했습니다.
+    */
+    @apply bg-[#0a0a0a] text-[#E0E0E0] min-h-screen flex items-center justify-center p-4 antialiased;
+  }
+}
+
+/* 사용자 정의 유틸리티 레이어 */
+@layer utilities {
+  /* [오로라 배경] 
+     - 위치를 fixed로 고정하여 스크롤이나 flex 레이아웃에 영향을 주지 않습니다.
+     - z-index를 -10으로 설정하여 콘텐츠 뒤에 깔립니다.
+  */
+  .aurora-bg {
+    @apply fixed inset-0 -z-10 w-full h-full;
+    background-image: radial-gradient(
+        at 20% 20%,
+        hsla(212, 72%, 60%, 0.3) 0px,
+        transparent 50%
+      ),
+      radial-gradient(at 80% 20%, hsla(263, 64%, 62%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 50% 80%, hsla(212, 72%, 60%, 0.3) 0px, transparent 50%);
+  }
+
+  /* [글래스 패널] 
+     - 로그인 박스 등에 사용할 반투명 유리창 효과입니다.
+  */
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-3xl border border-white/20 shadow-xl;
+  }
 }

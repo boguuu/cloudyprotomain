@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { signIn } from "next-auth/react";
 import { Cloud } from "lucide-react";
 
 const glassmorphismStyle =
@@ -9,8 +8,12 @@ const glassmorphismStyle =
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
-    // 구글 로그인 후 /chat 페이지로 이동하도록 설정
-    signIn("google", { callbackUrl: "/chating" });
+    // 로그인 성공 후 현재 프론트엔드의 /chating으로 리다이렉트
+    const redirectUri = `${window.location.origin}/chating`;
+    const url = `https://api.cloudify.lol/oauth2/authorization/google?redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}`;
+    window.location.assign(url);
   };
 
   return (
@@ -43,51 +46,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-// "use client";
-
-// import React from "react";
-// import { useRouter } from "next/navigation";
-// import { Cloud } from "lucide-react";
-
-// const glassmorphismStyle =
-//   "bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg";
-
-// export default function LoginPage() {
-//   const router = useRouter(); // useRouter 훅 사용
-
-//   const handleGoogleLogin = () => {
-//     // 실제 로그인을 호출하는 대신 /chat 페이지로 이동
-//     router.push("/chating");
-//   };
-
-//   return (
-//     <div className={`${glassmorphismStyle} w-full max-w-sm p-10 text-white/90`}>
-//       <div className="flex flex-col items-center space-y-8">
-//         {/* 헤더 */}
-//         <div className="text-center">
-//           <div className="flex flex-col items-center justify-center mb-4 space-y-3">
-//             <Cloud size={52} className="text-white/80" />
-//             <h1 className="text-4xl font-bold text-white">Cloudify</h1>
-//           </div>
-//           <p className="text-white/60">음악, 대화로 발견하다</p>
-//         </div>
-
-//         {/* '로그인' 버튼 (페이지 이동 기능) */}
-//         <div className="w-full pt-4">
-//           <button
-//             onClick={handleGoogleLogin}
-//             className="w-full bg-white/90 text-slate-800 py-3 rounded-lg font-semibold hover:bg-white transition-colors shadow-md transform hover:scale-105 duration-300"
-//           >
-//             Google 계정으로 로그인
-//           </button>
-//         </div>
-
-//         {/* 푸터 */}
-//         <div className="text-center text-xs text-white/40 pt-4">
-//           <p>&copy; 2025 Cloudify. All rights reserved.</p>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }

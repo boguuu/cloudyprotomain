@@ -1,16 +1,22 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { LogOut } from "lucide-react";
 
 export default function LogOutBtn() {
+  const handleLogout = async () => {
+    try {
+      await fetch("https://api.cloudify.lol/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (_) {
+      // ignore
+    } finally {
+      window.location.replace("/login");
+    }
+  };
+
   return (
-    <button
-      // className=" rounded hover:bg-white/10 w-6 h-6 flex items-center justify-center"
-      onClick={() => {
-        signOut();
-      }}
-      aria-label="Sign out"
-    >
+    <button onClick={handleLogout} aria-label="Sign out">
       <LogOut size={24} />
     </button>
   );
