@@ -28,6 +28,36 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // --- Auth Effect (HttpOnly 쿠키 기반) ---
+  // useEffect(() => {
+  //   let aborted = false;
+
+  //   const checkAuth = async () => {
+  //     try {
+  //       const res = await fetch("https://api.cloudify.lol/api/me", {
+  //         method: "GET",
+  //         credentials: "include",
+  //       });
+  //       if (aborted) return;
+
+  //       if (res.ok) {
+  //         setIsAuthenticated(true);
+  //       } else {
+  //         router.replace("/login");
+  //       }
+  //     } catch {
+  //       if (!aborted) router.replace("/login");
+  //     } finally {
+  //       if (!aborted) setIsAuthLoading(false);
+  //     }
+  //   };
+
+  //   checkAuth();
+  //   return () => {
+  //     aborted = true;
+  //   };
+  // }, [router]);
+
+  // --- Auth Effect (HttpOnly 쿠키 기반) ---
   useEffect(() => {
     let aborted = false;
 
@@ -42,10 +72,24 @@ export default function ChatPage() {
         if (res.ok) {
           setIsAuthenticated(true);
         } else {
+          // [수정됨] 로컬 환경이면 로그인 실패해도 튕기지 않게 하거나, 가짜 로그인 처리
+          if (window.location.hostname === "localhost") {
+            console.log(
+              "Localhost 개발 모드: 인증 실패 무시 및 가짜 로그인 처리"
+            );
+            setIsAuthenticated(true); // 개발용 임시 통과
+          } else {
+            router.replace("/login");
+          }
+        }
+      } catch (e) {
+        // [수정됨] 에러 발생 시에도 로컬이면 통과
+        if (window.location.hostname === "localhost") {
+          console.log("Localhost 에러 무시");
+          setIsAuthenticated(true);
+        } else if (!aborted) {
           router.replace("/login");
         }
-      } catch {
-        if (!aborted) router.replace("/login");
       } finally {
         if (!aborted) setIsAuthLoading(false);
       }
@@ -87,7 +131,7 @@ export default function ChatPage() {
       setIsLoading(false);
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/player");
       }, 1500);
     }, 1000);
   };
