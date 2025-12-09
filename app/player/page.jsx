@@ -26,8 +26,10 @@ export default async function PlayerPage() {
   }));
 
   return (
-    <div className="w-full max-w-7xl flex gap-4">
+    // <div className="min-h-screen w-full flex items-center justify-center ">
+    <div className="w-full max-w-6xl h-[650px] flex gap-4 text-white">
       <MusicPlayerClient initialPlaylist={safePlaylist} />
     </div>
+    // </div>
   );
 }
