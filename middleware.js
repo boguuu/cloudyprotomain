@@ -13,25 +13,20 @@ export async function middleware(req) {
     return NextResponse.next();
   }
 
-  // 개발 환경(호스트가 localhost)이면 우회
+  // 로컬 개발은 우회
   const host = req.headers.get("host") || "";
   if (host.startsWith("localhost")) {
     return NextResponse.next();
   }
 
-  // 백엔드 세션 확인 - 프론트의 쿠키를 그대로 전달
+  // 백엔드 세션 확인
   try {
     const meRes = await fetch("https://api.cloudify.lol/api/me", {
       method: "GET",
-      headers: {
-        cookie: req.headers.get("cookie") || "",
-      },
+      headers: { cookie: req.headers.get("cookie") || "" },
       cache: "no-store",
     });
-
-    if (meRes.ok) {
-      return NextResponse.next();
-    }
+    if (meRes.ok) return NextResponse.next();
   } catch (_) {
     // ignore
   }
