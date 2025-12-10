@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 // jsconfig.json의 경로 별칭(@/...)을 사용합니다.
 import MusicPlayerClient from "@/app/components/MusicPlayerClient";
-import LoginPage from "@/app/components/LoginPage";
-import HomePage from "@/app/components/HomePage";
+import LoginPage from "@/app/login/LoginPage";
+import HomePage from "@/app/homepage/HomePage";
 
 // 검색 후 보여줄 임시 플레이리스트 데이터
 const mockSongs = [

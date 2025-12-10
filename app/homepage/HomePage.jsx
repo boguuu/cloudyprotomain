@@ -5,10 +5,10 @@ import { useSession } from "next-auth/react";
 import { Menu } from "lucide-react";
 
 // 하위 컴포넌트 임포트 (파일 구조에 맞춤)
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 import AiChat from "./AiChat";
-import MainPlayer from "./MainPlayer";
-import Playlist from "./Playlist";
+import MainPlayer from "../components/MainPlayer";
+import Playlist from "../components/Playlist";
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -41,6 +41,7 @@ export default function HomePage() {
   }, []);
 
   // AI 추천 결과 업데이트 핸들러 (AiChat 컴포넌트에서 호출)
+
   const handleRecommendation = (newPlaylist) => {
     setPlaylist(newPlaylist);
     if (newPlaylist.khlength > 0) {
@@ -48,6 +49,8 @@ export default function HomePage() {
       // setCurrentSong(newPlaylist[0]);
     }
   };
+
+
 
   // 노래 선택 핸들러
   const handleSongSelect = (song) => {
