@@ -74,7 +74,7 @@ export default function Playlist({
     <aside className={`${glassmorphismStyle} p-6 flex flex-col w-80`}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-white/90">Next Up</h3>
-        <button
+        {/* <button
           type="button"
           onClick={() => setShowLyrics((v) => !v)}
           className={`font-semibold text-sm px-2 py-1 rounded ${
@@ -85,7 +85,7 @@ export default function Playlist({
           aria-pressed={showLyrics}
         >
           lyric
-        </button>
+        </button> */}
         <p className="text-sm text-white/50">{safeList.length} songs</p>
       </div>
 
@@ -160,13 +160,13 @@ export default function Playlist({
       )}
 
       {/* Save 버튼은 그대로 유지 */}
-      <button
+      {/* <button
         onClick={handleSavePlaylist}
         disabled={isSaving}
         className="mt-4 w-full bg-white/90 text-slate-800 py-2.5 rounded-lg font-semibold hover:bg-white transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSaving ? "Saving..." : "Save Playlist to YouTube"}
-      </button>
+      </button> */}
     </aside>
   );
 }

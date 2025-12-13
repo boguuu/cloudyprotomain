@@ -8,7 +8,6 @@ const glassmorphismStyle =
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
-    // 로그인 성공 후 현재 프론트엔드의 /chating으로 리다이렉트
     const redirectUri = `${window.location.origin}/chating`;
     const url = `https://api.cloudify.lol/oauth2/authorization/google?redirect_uri=${encodeURIComponent(
       redirectUri
@@ -32,7 +31,7 @@ export default function LoginPage() {
         <div className="w-full pt-4">
           <button
             onClick={handleGoogleLogin}
-            className="w-full bg-white/90 text-slate-800 py-3 rounded-lg font-semibold hover:bg-white transition-colors shadow-md transform hover:scale-105 duration-300"
+            className="w-full bg-white/90 text-slate-800 py-3 rounded-lg font-semibold hover:bg-white transition-all shadow-md transform hover:scale-105 duration-300"
           >
             Google 계정으로 로그인
           </button>

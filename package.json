@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:https": "node server.mjs",
+    "dev:https": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& node server.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
